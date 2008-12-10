@@ -130,7 +130,6 @@ class CachedSvnArchiver extends RequestHandler {
 			}
 		}
 		
-		
 		// Otherwise, let's do the build.
 		$CLI_folder = escapeshellarg($folder);
 		$CLI_tmp = escapeshellarg(TEMP_FOLDER);
@@ -138,7 +137,7 @@ class CachedSvnArchiver extends RequestHandler {
 		$CLI_url = escapeshellarg($this->url);
 		
 		$destDir = dirname($this->fullFilename());
-		if(!is_dir($destDir) && !mkdir(dirname($destDir), 0777, true)) {
+		if(!is_dir($destDir) && !mkdir($destDir, 0777, true)) {
 			user_error("Couldn't create directory: " . $destDir, E_USER_ERROR);
 		}
 
