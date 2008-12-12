@@ -76,7 +76,7 @@ class CachedSvnArchiver extends RequestHandler {
 		
 		$retVal = 0;
 		$output = array();
-		exec("svn info --xml $CLI_url &> /dev/stdout", $output, $retVal);
+		exec("unset DYLD_LIBRARY_PATH && svn info --xml $CLI_url &> /dev/stdout", $output, $retVal);
 		
 		if($retVal == 0) {
 			$info = new SimpleXMLElement(implode("\n", $output));
@@ -143,7 +143,7 @@ class CachedSvnArchiver extends RequestHandler {
 
 		$retVal = 0;
 		$output = array();
-		exec("cd $CLI_tmp && svn export $CLI_url $CLI_folder && tar czf $CLI_outputFile $CLI_folder && rm -r $CLI_folder", $output, $retVal);
+		exec("cd $CLI_tmp && unset DYLD_LIBRARY_PATH && svn export $CLI_url $CLI_folder && tar czf $CLI_outputFile $CLI_folder && rm -r $CLI_folder", $output, $retVal);
 			
 		if($retVal == 0) {
 			Director::redirect($this->fullURL());
