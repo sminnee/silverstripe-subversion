@@ -25,6 +25,8 @@ class CachedSvnArchiver extends RequestHandler {
 	protected $cacheDir, $cacheURL, $url;
 	protected $_cache = array();
 	
+	protected $baseFilename = null;
+	
 	static $allowed_actions = array(
 		'generate',
 	);
@@ -55,11 +57,28 @@ class CachedSvnArchiver extends RequestHandler {
 	function Filename() {
 		if(!isset($this->_cache['Filename'])) {
 			$parts = $this->svnParts();
-			if($parts['type'] == 'tags') $this->_cache['Filename'] = "{$parts['module']}-v{$parts['instance']}.tar.gz";
-			else $this->_cache['Filename'] = "{$parts['module']}-{$parts['instance']}-r" . $this->currentRev() . ".tar.gz";
+			
+			$baseFilename = $this->baseFilename ? $this->baseFilename : $parts['module'];
+			
+			if($parts['type'] == 'tags') $this->_cache['Filename'] = "$baseFilename-v{$parts['instance']}.tar.gz";
+			else $this->_cache['Filename'] = "$baseFilename-{$parts['instance']}-r" . $this->currentRev() . ".tar.gz";
 		}
 		return $this->_cache['Filename'];
 	}
+	
+	function FileSize() {
+		$this->createFile();
+		$size = filesize($this->fullFilename());
+		return File::format_size($size);
+	}
+	
+	/**
+	 * Set the base filename to which "-v1.2.3" or "-trunk-r123424" is suffixed
+	 */
+	function setBaseFilename($baseFilename) {
+		$this->baseFilename = $baseFilename;
+	}
+	
 
 	function fullFilename() {
 		return $this->cacheDir . '/' . $this->Filename();
@@ -79,8 +98,12 @@ class CachedSvnArchiver extends RequestHandler {
 		exec("unset DYLD_LIBRARY_PATH && svn info --xml $CLI_url &> /dev/stdout", $output, $retVal);
 		
 		if($retVal == 0) {
-			$info = new SimpleXMLElement(implode("\n", $output));
-			if($info->entry->commit['revision']) return $info->entry->commit['revision'];
+			try {
+				$info = new SimpleXMLElement(implode("\n", $output));
+				if($info->entry->commit['revision']) return $info->entry->commit['revision'];
+			} catch(Exception $e) {
+				// break to the error below
+			}
 		}
 		
 		// If we didn't return by now, then we have an error
@@ -131,24 +154,39 @@ class CachedSvnArchiver extends RequestHandler {
 		}
 		
 		// Otherwise, let's do the build.
-		$CLI_folder = escapeshellarg($folder);
-		$CLI_tmp = escapeshellarg(TEMP_FOLDER);
-		$CLI_outputFile = escapeshellarg($this->fullFilename());
-		$CLI_url = escapeshellarg($this->url);
-		
-		$destDir = dirname($this->fullFilename());
-		if(!is_dir($destDir) && !mkdir($destDir, 0777, true)) {
-			user_error("Couldn't create directory: " . $destDir, E_USER_ERROR);
-		}
-
-		$retVal = 0;
-		$output = array();
-		exec("cd $CLI_tmp && unset DYLD_LIBRARY_PATH && svn export $CLI_url $CLI_folder && tar czf $CLI_outputFile $CLI_folder && rm -r $CLI_folder", $output, $retVal);
-			
-		if($retVal == 0) {
+		if($this->createFile()) {
 			Director::redirect($this->fullURL());
+		}
+	}
+	
+	/**
+	 * Actually create the file, if it doesn't already exist
+	 */
+	private function createFile() {
+		if(!file_exists($this->fullFilename())) {
+			$folder = str_replace('.tar.gz','', $this->Filename());
+
+			$CLI_folder = escapeshellarg($folder);
+			$CLI_tmp = escapeshellarg(TEMP_FOLDER);
+			$CLI_outputFile = escapeshellarg($this->fullFilename());
+			$CLI_url = escapeshellarg($this->url);
+		
+			$destDir = dirname($this->fullFilename());
+			if(!is_dir($destDir) && !mkdir($destDir, 0777, true)) {
+				user_error("Couldn't create directory: " . $destDir, E_USER_ERROR);
+			}
+
+			$retVal = 0;
+			$output = array();
+			exec("cd $CLI_tmp && unset DYLD_LIBRARY_PATH && svn export $CLI_url $CLI_folder && tar czf $CLI_outputFile $CLI_folder && rm -r $CLI_folder", $output, $retVal);
+			
+			if($retVal == 0) {
+				return true;
+			} else {
+				user_error("Couldn't produce .tar.gz of output (return val $retVal): " . implode("\n", $output));
+			}
 		} else {
-			user_error("Couldn't produce .tar.gz of output (return val $retVal): " . implode("\n", $output));
+			return true;
 		}
 	}
 }
