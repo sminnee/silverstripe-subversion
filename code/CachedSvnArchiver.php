@@ -40,7 +40,7 @@ class CachedSvnArchiver extends RequestHandler {
 		
 		if($cacheDir[0] == '/') user_error("Please supply a relative directory for the cacheDir - it needs to be in the web root", E_USER_ERROR);
 		$this->cacheDir = BASE_PATH . '/' . $cacheDir;
-		$this->cacheURL = BASE_URL . '/' . $cacheDir;
+		$this->cacheURL = (BASE_URL=='/' ? BASE_URL : BASE_URL.'/') . $cacheDir;
 		
 		$this->url = $url;
 	}
@@ -50,8 +50,8 @@ class CachedSvnArchiver extends RequestHandler {
 	}
 	
 	function URL() {
-		if(file_exists($this->fullFilename())) return Director::absoluteURL($this->fullURL());
-		else return Controller::join_links(Director::absoluteURL($this->Link()), 'generate');
+		if(file_exists($this->fullFilename())) return $this->fullURL();
+		else return Controller::join_links($this->Link(), 'generate');
 	}
 
 	function Filename() {
