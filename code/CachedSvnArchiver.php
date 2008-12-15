@@ -50,8 +50,8 @@ class CachedSvnArchiver extends RequestHandler {
 	}
 	
 	function URL() {
-		if(file_exists($this->fullFilename())) return $this->fullURL();
-		else return Controller::join_links($this->Link(), 'generate');
+		if(file_exists($this->fullFilename())) return Director::absoluteURL($this->fullURL());
+		else return Controller::join_links(Director::absoluteURL($this->Link()), 'generate');
 	}
 
 	function Filename() {
