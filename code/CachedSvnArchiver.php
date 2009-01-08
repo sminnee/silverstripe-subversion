@@ -102,12 +102,8 @@ class CachedSvnArchiver extends RequestHandler {
 				$info = new SimpleXMLElement(implode("\n", $output));
 				if($info->entry->commit['revision']) return $info->entry->commit['revision'];
 			} catch(Exception $e) {
-				// break to the error below
 			}
 		}
-		
-		// If we didn't return by now, then we have an error
-		user_error("Error calling svn (return val $retVal): " . implode("\n", $output), E_USER_ERROR);
 	}
 	
 	/**
