@@ -66,6 +66,10 @@ class CachedSvnArchiver extends RequestHandler {
 		return $this->_cache['Filename'];
 	}
 	
+	function Name() {
+		return $this->Filename();
+	}
+	
 	function FileSize() {
 		$this->createFile();
 		$size = filesize($this->fullFilename());
