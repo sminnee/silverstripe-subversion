@@ -143,7 +143,7 @@ class CachedSvnArchiver extends RequestHandler {
 
 		// If someone else has started producing the file, then wait for them to finish.
 		// Wait for 120 seconds and if it's still not ready, then build it ourselves
-		} else if(file_exists(TEMP_FOLDER .'/'. $folder)) {
+		} else if(file_exists(TEMP_FOLDER . '/' . $folder)) {
 			for($i=0;$i<120;$i++) {
 				sleep(1);
 				if(file_exists($this->fullFilename())) {
@@ -165,7 +165,7 @@ class CachedSvnArchiver extends RequestHandler {
 	private function createFile() {
 		if(!file_exists($this->fullFilename())) {
 			$folder = str_replace('.tar.gz','', $this->Filename());
-
+			
 			$CLI_folder = escapeshellarg($folder);
 			$CLI_tmp = escapeshellarg(TEMP_FOLDER);
 			$CLI_outputFile = escapeshellarg($this->fullFilename());
@@ -183,7 +183,7 @@ class CachedSvnArchiver extends RequestHandler {
 			if($retVal == 0) {
 				return true;
 			} else {
-				user_error("Couldn't produce .tar.gz of output (return val $retVal): " . implode("\n", $output));
+				user_error("Couldn't produce .tar.gz of output (return val $retVal): " . implode("\n", $output), E_USER_ERROR);
 			}
 		} else {
 			return true;
