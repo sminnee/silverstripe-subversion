@@ -119,10 +119,18 @@ class CachedSvnArchiver extends RequestHandler {
 	 */
 	function svnParts() {
 		$parts = array('module' => null, 'type' => null, 'instance' => null);
+		
+		// "modules/mymodule/trunk" syntax
 		if(preg_match('/\/([^\/]+)\/(branches|tags|trunk|sandbox)/', $this->url, $matches)) {
 			$parts['module'] = $matches[1];
 			$parts['type'] = $matches[2];
+		
+		// "modules/mymodule" syntax - assume trunk
+		} else if(preg_match('/\/([^\/]+)\/?/', $this->url, $matches)) {
+			$parts['module'] = $matches[1];
+			$parts['type'] = 'trunk';
 		}
+		
 		$parts['instance'] = basename($this->url);
 		return $parts;
 	}
