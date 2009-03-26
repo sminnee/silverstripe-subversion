@@ -112,10 +112,13 @@ class CachedSvnArchiver extends RequestHandler {
 	
 	/**
 	 * Returns an array of info from the subversion URL.
+	 * 
 	 * blog/trunk will go to array('module' => 'blog', 'type' => 'trunk', 'instance' => 'trunk')
 	 * blog/tags/0.2.2 will go to array('module' => 'blog', 'type' => 'tags', 'instance' => '0.2.2')
 	 * blog/branches/0.2.2 will go to array('module' => 'blog', 'type' => 'branches', 'instance' => '0.2.2')
 	 * blog/tags/rc/0.2.2-rc1 will go to array('module' => 'blog', 'type' => 'tags', 'instance' => '0.2.2-rc1')
+	 * 
+	 * @return array of information on the SVN URL
 	 */
 	function svnParts() {
 		$parts = array('module' => null, 'type' => null, 'instance' => null);
@@ -132,6 +135,7 @@ class CachedSvnArchiver extends RequestHandler {
 		}
 		
 		$parts['instance'] = basename($this->url);
+		
 		return $parts;
 	}
 	
