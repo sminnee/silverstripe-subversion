@@ -35,6 +35,7 @@ class CachedSvnArchiver extends RequestHandler {
 	 * @param $url The subversion URL to enable for download
 	 */
 	function __construct($parent, $name, $url, $cacheDir = 'assets/downloads') {
+		parent::__construct();
 		$this->parent = $parent;
 		$this->name = $name;
 		
