@@ -96,19 +96,7 @@ class CachedSvnArchiver extends RequestHandler {
 	 * Returns the latest revision # of the SVN url
 	 */
 	function currentRev() {
-		$CLI_url = escapeshellarg($this->url);
-		
-		$retVal = 0;
-		$output = array();
-		exec("unset DYLD_LIBRARY_PATH && svn info --xml $CLI_url &> /dev/stdout", $output, $retVal);
-		
-		if($retVal == 0) {
-			try {
-				$info = new SimpleXMLElement(implode("\n", $output));
-				if($info->entry->commit['revision']) return $info->entry->commit['revision'];
-			} catch(Exception $e) {
-			}
-		}
+		return SvnInfoCache::for_url($this->url)->LatestRev;
 	}
 	
 	/**
