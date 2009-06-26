@@ -91,7 +91,7 @@ class SvnInfoCache extends DataObject {
 					$date = (string)$entry->commit->date;
 					$rev = (string)$entry->commit['revision'];
 					
-					$subdirInfo[$name] = array('date' => 'date', 'rev' => $rev);
+					$subdirInfo[$name] = array('date' => $date, 'rev' => $rev);
 				}
 			}
 			$this->ChildDirsPacked = serialize($subdirInfo);
