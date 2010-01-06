@@ -10,7 +10,7 @@
  * Within a Controller or RequestHandler:
  * <code>
  * function TrunkDownload() {
- *     return CachedSvnArchiver($this, "Trunk", "http://svn.silverstripe.com/open/modules/phpinstaller/trunk", "assets/downloads");
+ *     return new CachedSvnArchiver($this, "Trunk", "http://svn.silverstripe.com/open/modules/phpinstaller/trunk", "assets/downloads");
  * }
  * </code>
  *
@@ -133,7 +133,8 @@ class CachedSvnArchiver extends RequestHandler {
 	 */
 	function generate() {
 		// Give ourselves a reasonable amount of time
-		if(ini_get('max_execution_time') < 300) set_time_limit(300);
+		if(ini_get('max_execution_time') < 1000) set_time_limit(1000);
+		//ini_set('memory_limit', '512M');
 		
 		$folder = str_replace('.tar.gz','', $this->Filename());
 
@@ -179,8 +180,7 @@ class CachedSvnArchiver extends RequestHandler {
 
 			$retVal = 0;
 			$output = array();
-			exec("cd $CLI_tmp && unset DYLD_LIBRARY_PATH && svn export $CLI_url $CLI_folder && tar czf $CLI_outputFile $CLI_folder && rm -r $CLI_folder", $output, $retVal);
-			
+			exec("cd $CLI_tmp && unset DYLD_LIBRARY_PATH && svn export $CLI_url $CLI_folder --force && tar czf $CLI_outputFile $CLI_folder && rm -r $CLI_folder", $output, $retVal);
 			if($retVal == 0) {
 				return true;
 			} else {
