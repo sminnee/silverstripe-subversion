@@ -66,8 +66,8 @@ class SvnInfoCache extends DataObject {
 			$retVal = 0;
 			$output = array();
 			exec("unset DYLD_LIBRARY_PATH && svn info --xml $CLI_url &> /dev/stdout", $output, $retVal);
-
-			if($retVal == 0) {
+			if($retVal == 0 && preg_match("/\<\?xml/", $output[0])) {
+				Debug::show($output[0]);
 				try {
 					$info = new SimpleXMLElement(implode("\n", $output));
 					if($info->entry->commit['revision']) {
