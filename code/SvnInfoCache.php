@@ -27,6 +27,39 @@ class SvnInfoCache extends DataObject {
 		return $obj;
 	}
 	
+	static function build_up_tree_source($url){
+		preg_match('/^(.+)\/([^\/]+)$/', $url, $matches);
+		if($can = self::is_not_leaf_node($url)){
+			$svnInfo = SvnInfoCache::for_url($url)->childDirs();
+			$retVal = array();
+			foreach($svnInfo as $k=>$v){
+				$val = self::build_up_tree_source($url."/".$k);
+				$retVal[$k] = $val;
+			}
+			return $retVal;
+		}else{//is a leaf
+			return $matches[2];
+		}
+	}
+	
+	static function is_not_leaf_node($url){
+		$CLI_url = escapeshellarg($url);
+		$retVal = 0;
+		$output = array();
+
+		exec("unset DYLD_LIBRARY_PATH && svn ls --xml $CLI_url", $output, $retVal);
+		if($retVal == 0) {
+			$subdirs = new SimpleXMLElement(implode("\n", $output));
+			foreach($subdirs->xpath('//entry') as $entry) {
+				$kind = $entry->attributes()->asXML();
+				if(strpos($kind, "kind=\"dir\"") === false){
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+	
 	/**
 	 * Return the latest revision number for the given URL.
 	 */
