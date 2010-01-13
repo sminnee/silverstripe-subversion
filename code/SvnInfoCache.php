@@ -9,6 +9,7 @@ class SvnInfoCache extends DataObject {
 	static $db = array(
 		"URL" => "Varchar(255)",
 		"LatestRevPacked" => "Int",
+		"LatestDatePacked" => "Date",
 		"ChildDirsPacked" => "Text",
 		"NeedsLatestRev" => "Boolean",
 		"NeedsChildDirs" => "Boolean",
@@ -72,6 +73,19 @@ class SvnInfoCache extends DataObject {
 		}
 		return $rev;
 	}
+	
+	/**
+	 * Return the latest revision date for the given URL.
+	 */
+	function getLatestDate() {
+		$date = $this->LatestDatePacked;
+		if(!$date && $this->URL) {
+			$this->NeedsLatestRev = 1;
+			$this->update();
+			$date = $this->LatestDatePacked;
+		}
+		return $date;
+	}
 
 	/**
 	 * Return an array of the child directories
@@ -104,6 +118,7 @@ class SvnInfoCache extends DataObject {
 					$info = new SimpleXMLElement(implode("\n", $output));
 					if($info->entry->commit['revision']) {
 						$this->LatestRevPacked = (string)$info->entry->commit['revision'];
+						$this->LatestDatePacked = (string)$info->entry->commit->date;
 					}
 				} catch(Exception $e) {
 				}

@@ -98,6 +98,12 @@ class CachedSvnArchiver extends RequestHandler {
 	function currentRev() {
 		return SvnInfoCache::for_url($this->url)->LatestRev;
 	}
+	/**
+	 * Returns the latest revision date of the SVN url
+	 */
+	function currentDate() {
+		return SvnInfoCache::for_url($this->url)->LatestDate;
+	}
 	
 	/**
 	 * Returns an array of info from the subversion URL.
