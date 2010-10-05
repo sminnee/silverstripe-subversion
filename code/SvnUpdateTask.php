@@ -8,3 +8,14 @@ class SvnUpdateTask extends DailyTask {
 		}
 	}
 }
+
+class SvnUpdateTask_Manual extends BuildTask {
+	
+	function run($request) {
+		echo "Running Update \n";
+		
+		$update = new SvnUpdateTask();
+		
+		$update->process();
+	}
+}

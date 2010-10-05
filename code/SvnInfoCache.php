@@ -20,11 +20,13 @@ class SvnInfoCache extends DataObject {
 	 */
 	static function for_url($url) {
 		$obj = DataObject::get_one('SvnInfoCache', "URL = '" . Convert::raw2sql($url) . "'");
+		
 		if(!$obj) {
 			$obj = new SvnInfoCache();
 			$obj->URL = $url;
 			$obj->write();
 		}
+		
 		return $obj;
 	}
 	
@@ -92,13 +94,14 @@ class SvnInfoCache extends DataObject {
 	 */
 	function childDirs() {
 		$dirs = $this->getField('ChildDirsPacked');
+		
 		if(!$dirs && $this->URL) {
 			$this->NeedsChildDirs = 1;
 			$this->update();
 			$dirs = $this->getField('ChildDirsPacked');
 		}
 		
-		return unserialize($dirs);
+		return ($dirs) ? unserialize($dirs) : array();
 	}
 
 	
@@ -121,7 +124,11 @@ class SvnInfoCache extends DataObject {
 						$this->LatestDatePacked = (string)$info->entry->commit->date;
 					}
 				} catch(Exception $e) {
+					user_error($e, E_USER_WARNING);
 				}
+			}
+			else {
+				user_error("svn info failed ". $output, E_USER_WARNING);
 			}
 		}
 
@@ -132,16 +139,25 @@ class SvnInfoCache extends DataObject {
 
 			exec("unset DYLD_LIBRARY_PATH && svn ls --xml $CLI_url", $output, $retVal);
 			if($retVal == 0) {
+				$subdirInfo = array();
+				
 				$subdirs = new SimpleXMLElement(implode("\n", $output));
-				foreach($subdirs->xpath('//entry') as $entry) {
-					$name = (string)$entry->name;
-					$date = (string)$entry->commit->date;
-					$rev = (string)$entry->commit['revision'];
+				
+				if($subdirs) {
+					foreach($subdirs->xpath('//entry') as $entry) {
+						$name = (string)$entry->name;
+						$date = (string)$entry->commit->date;
+						$rev = (string)$entry->commit['revision'];
 					
-					$subdirInfo[$name] = array('date' => $date, 'rev' => $rev);
+						$subdirInfo[$name] = array('date' => $date, 'rev' => $rev);
+					}
 				}
+				
+				$this->ChildDirsPacked = serialize($subdirInfo);
 			}
-			$this->ChildDirsPacked = serialize($subdirInfo);
+			else {
+				user_error("svn info failed ". $output, E_USER_WARNING);
+			}
 		}
 
 		$this->write();
