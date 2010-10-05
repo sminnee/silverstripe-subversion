@@ -139,11 +139,10 @@ class SvnInfoCache extends DataObject {
 
 			exec("unset DYLD_LIBRARY_PATH && svn ls --xml $CLI_url", $output, $retVal);
 			if($retVal == 0) {
-				$subdirInfo = array();
-				
 				$subdirs = new SimpleXMLElement(implode("\n", $output));
 				
 				if($subdirs) {
+					$subdirInfo = array();
 					foreach($subdirs->xpath('//entry') as $entry) {
 						$name = (string)$entry->name;
 						$date = (string)$entry->commit->date;
@@ -151,9 +150,9 @@ class SvnInfoCache extends DataObject {
 					
 						$subdirInfo[$name] = array('date' => $date, 'rev' => $rev);
 					}
+					
+					$this->ChildDirsPacked = serialize($subdirInfo);
 				}
-				
-				$this->ChildDirsPacked = serialize($subdirInfo);
 			}
 			else {
 				user_error("svn info failed ". $output, E_USER_WARNING);
