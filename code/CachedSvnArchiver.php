@@ -52,7 +52,7 @@ class CachedSvnArchiver extends RequestHandler {
 	
 	function URL() {
 		if(file_exists($this->fullFilename())) return $this->fullURL();
-		else return Controller::join_links($this->Link(), 'generate');
+		else return Controller::join_links($this->Link(), 'generate?u='.Convert::raw2att($this->url));
 	}
 
 	function Filename() {
@@ -116,6 +116,7 @@ class CachedSvnArchiver extends RequestHandler {
 	 * @return array of information on the SVN URL
 	 */
 	function svnParts() {
+		
 		$parts = array('module' => null, 'type' => null, 'instance' => null);
 		
 		// "modules/mymodule/trunk" syntax
@@ -138,6 +139,12 @@ class CachedSvnArchiver extends RequestHandler {
 	 * Actually create the .tar.gz file 
 	 */
 	function generate() {
+		$request = $this->getRequest();
+		if ($request->getVar('u')) {
+			$u = Convert::raw2sql($request->getVar('u'));
+			if ($u && strlen($u) > 0) $this->url = $u;
+		}
+		
 		// Give ourselves a reasonable amount of time
 		if(ini_get('max_execution_time') < 1000) set_time_limit(1000);
 		//ini_set('memory_limit', '512M');
