@@ -1,21 +1,7 @@
 ############################################
-Subversion Module
+Subversion Module [ABANDONED]
 ############################################
 
-Maintainer Contact
------------------------------------------------
-Sam Minnee (Nickname: sam / sminnee)
-<sam (at) silverstripe (dot) com>
+This module provides integration between Subversion and SilverStripe.
 
-Requirements
------------------------------------------------
-
-Documentation
------------------------------------------------
-http://doc.silverstripe.com/doku.php?id=modules:subversion
-
-Installation Instructions
------------------------------------------------
-
-Usage Overview
------------------------------------------------
+Note that it is abandoned and was last worked on in 2011. However, you are welcome to use it as-is.
